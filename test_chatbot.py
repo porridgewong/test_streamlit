@@ -189,7 +189,7 @@ def compose_system_prompt(
     hobs_dict = {x.type.name: x for x in cs.FEMALE_HOBBIES}
     selected_hobbies = [hobs_dict[x] for x in hobbies]
 
-    if model == "glm-4":
+    if model in ("glm-4", "doubao-pro-4k"):
         system_prompt = CHINESE_SYSTEM_PROMPT_TEMPLATE.format(
             name=name,
             gender="男" if user_gender == "Male" else "女",
@@ -220,6 +220,32 @@ def compose_system_prompt(
 if "messages" not in st.session_state.keys():
     st.session_state.messages = []
 
+with st.expander("Override system prompt"):
+    overridden_system_prompt = st.text_area("Override system prompt...")
+
+# Display system prompt
+with st.expander(
+    "System prompt (clear the overriding system prompt to fall back to the default)"
+):
+    current_system_prompt = compose_system_prompt(
+        selected_model,
+        user_name,
+        user_gender,
+        name,
+        gender,
+        personality,
+        age_range,
+        occupation,
+        hobbies,
+        relationship,
+    )
+    if (
+        overridden_system_prompt is not None
+        and len(overridden_system_prompt.strip()) > 0
+    ):
+        current_system_prompt = overridden_system_prompt
+    st.text(current_system_prompt)
+
 # Display or clear chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -246,6 +272,12 @@ def generate_response():
         hobbies,
         relationship,
     )
+
+    if (
+        overridden_system_prompt is not None
+        and len(overridden_system_prompt.strip()) > 0
+    ):
+        system_prompt = overridden_system_prompt.strip()
     messages = [{"role": "system", "content": system_prompt}]
     # prepare history
     for dict_message in st.session_state.messages:
