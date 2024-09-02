@@ -4,6 +4,7 @@ import streamlit as st
 from groq import Groq
 from typing import List
 from openai import OpenAI
+from volcenginesdkarkruntime import Ark
 from zhipuai import ZhipuAI
 from prompt_templates import SYSTEM_PROMPT_TEMPLATE, CHINESE_SYSTEM_PROMPT_TEMPLATE
 
@@ -20,13 +21,21 @@ def get_api_key(key_name: str) -> str:
     return api_key
 
 
+def get_model_endpoint():
+    if "ARK_MODEL_ENDPOINT" in os.environ:
+        model_endpoint = os.environ.get("ARK_MODEL_ENDPOINT")
+    else:
+        model_endpoint = st.secrets["ARK_MODEL_ENDPOINT"]
+    return model_endpoint
+
+
 with st.sidebar:
     st.title("设置")
 
     st.subheader("Models and parameters")
     selected_model = st.sidebar.selectbox(
         "Select a model",
-        ["gpt-4o", "glm-4", "llama-3.1-70b"],
+        ["gpt-4o", "glm-4", "doubao-pro-4k", "llama-3.1-70b"],
         key="selected_model",
     )
     if selected_model == "gpt-4o":
@@ -35,6 +44,9 @@ with st.sidebar:
     elif selected_model == "glm-4":
         llm = ZhipuAI(api_key=get_api_key("ZHIPU_API_KEY"))
         model = "glm-4-0520"
+    elif selected_model == "doubao-pro-4k":
+        llm = Ark(api_key=get_api_key("ARK_API_KEY"))
+        model = get_model_endpoint()
     else:
         llm = Groq(api_key=get_api_key("GROQ_API_KEY"))
         model = "llama-3.1-70b-versatile"
