@@ -64,6 +64,7 @@ tqdm==4.66.5
 typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.2
+volcengine-python-sdk==1.0.99
 xxhash==3.5.0
 yarl==1.9.6
 zhipuai==2.1.4.20230814
